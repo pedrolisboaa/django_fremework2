@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala do Pedrão!</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>  
+    
+    <div class="container">
+        <textarea name="sala" id="sala" cols="70" rows="15"></textarea>
+        <input type="text" id="texto" size="100"><br>
+        <button>
+            <input type="button" value="Eviar" class="btn btn-primary" id="botao">
+        </button>
+    </div>
+
+
+    <script>
+        
+        var nome_sala = {{ nome_sala_json }}
+        var chatSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/chat/' + nome_sala + '/');
+
+        chatSocket.onmessage = function(e){
+            var dados = JSON.parse(e.data);
+            var mensagem = dados['mensagem'];
+            document.querySelector('#sala').value += (mensagem + '\n');
+        };
+
+        chatSocket.onclose = function(e){
+            console.error('O chat encerrou de forma inesperada.');
+        };
+
+        document.querySelector('#texto').focus();
+        document.querySelector('#texto').onkeyup = function(e){
+            if(e.keyCode === 13){
+                document.querySelector('#botao').click();
+            }
+        };
+
+        document.querySelector('#botao').onclick = function(e){
+            var mensagemInput = document.querySelector('#texto');
+            var mensagem = mensagemInput.value;
+            chatSocket.send(JSON.stringify({
+                'mensagem': mensagem
+            }));
+            mensagemInput.value = '';
+        };
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
